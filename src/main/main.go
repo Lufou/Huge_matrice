@@ -61,6 +61,8 @@ func main() {
 
 	//fonction pour multiplier les matrices, basique
 	// après, la même avec des coroutines
+
+	multiplication(matA, matB)
 }
 
 //var rowsmatA, columnsmatA int = 2,3
@@ -73,4 +75,17 @@ func possibleProduct(rA int, cA int, rB int, cB int) (check bool) {
 		fmt.Print("Multiplication de matrices possible")
 		return true
 	}
+}
+
+func multiplication(matA [][]int, matB [][]int) {
+	var matMult [][]int = make([][]int, taille)
+
+	for i := 0; i < len(matA); i++ {
+		matMult[i] = make([]int, len(matA))
+		for j := 0; j < len(matA); j++ {
+			matMult[i][j] = matA[i][j] * matB[i][j]
+		}
+	}
+
+	fmt.Println("Mult :", matMult)
 }
