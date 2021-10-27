@@ -57,10 +57,10 @@ func main() {
 	for i := 0; i < len(matList); i++ {
 		sizes[i] = make([]int, 2)
 	}
-	sizes[0][0] = 30
-	sizes[0][1] = 30
-	sizes[1][0] = 30
-	sizes[1][1] = 30
+	sizes[0][0] = 30 // taille verticale de la 1ère mat
+	sizes[0][1] = 30 // taille horizontale de la 1ère mat
+	sizes[1][0] = 30 // taille verticale de la 2ème mat
+	sizes[1][1] = 30 // taille horizontale de la 2ème mat
 
 	remplirMatrices(matList, 2, sizes)
 	printMatList(matList, 2)
