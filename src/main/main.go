@@ -11,7 +11,7 @@ func remplirMatrices(matList [][][]int, nombre int, sizes [][]int) {
 		for i := 0; i < len(mat); i++ {
 			mat[i] = make([]int, sizes[k][1])
 			for j := 0; j < len(mat[0]); j++ {
-				mat[i][j] = rand.Intn(10000)
+				mat[i][j] = rand.Intn(10000) // Default: 10000
 			}
 		}
 		matList[k] = mat
@@ -52,18 +52,20 @@ func printMatList(matList [][][]int, nombre int) {
 }
 
 func main() {
-	matList := make([][][]int, 2)
+	matList := make([][][]int, 3)
 	sizes := make([][]int, len(matList))
 	for i := 0; i < len(matList); i++ {
-		sizes[i] = make([]int, 2)
+		sizes[i] = make([]int, 3)
 	}
 	sizes[0][0] = 30 // taille verticale de la 1ère mat
 	sizes[0][1] = 30 // taille horizontale de la 1ère mat
 	sizes[1][0] = 30 // taille verticale de la 2ème mat
 	sizes[1][1] = 30 // taille horizontale de la 2ème mat
+	sizes[2][0] = 30
+	sizes[2][1] = 30
 
-	remplirMatrices(matList, 2, sizes)
-	printMatList(matList, 2)
+	remplirMatrices(matList, 3, sizes)
+	printMatList(matList, 3)
 
 	printMat(multiplication(matList))
 }
@@ -79,17 +81,20 @@ func possibleProduct(rA int, cA int, rB int, cB int) (check bool) {
 }
 
 func multiplication(matList [][][]int) [][]int {
-	var matMult [][]int
+	var result [][]int
 
 	for k := 1; k < len(matList); k++ {
-		matMult = make([][]int, len(matList[k]))
-		for i := 0; i < len(matList[k]); i++ {
-			matMult[i] = make([]int, len(matList[k][i]))
+		result = make([][]int, len(matList[k]))
+		for i := 0; i < len(matList[k-1]); i++ {
+			result[i] = make([]int, len(matList[k][i]))
 			for j := 0; j < len(matList[k][0]); j++ {
-				matMult[i][j] = matList[k-1][i][j] * matList[k][i][j]
+				for l := 0; l < len(matList[k]); l++ {
+					result[i][j] = result[i][j] + matList[k-1][i][l]*matList[k][l][j]
+				}
 			}
 		}
+		matList[k] = result
 	}
 
-	return matMult
+	return result
 }
