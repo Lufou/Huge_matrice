@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -12,8 +13,8 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-const LARGEUR_MATRICES = 1000
-const HAUTEUR_MATRICES = 1000
+const LARGEUR_MATRICES = 500
+const HAUTEUR_MATRICES = 500
 
 /*func remplirMatrices(matList [][][]int, nombre int, sizes [][]int) {
 	for k := 0; k < nombre; k++ {
@@ -29,33 +30,37 @@ const HAUTEUR_MATRICES = 1000
 }*/
 
 func remplirMatrices() {
+	fmt.Printf("#START remplirMatrices\n")
 	matA = make([][]int, HAUTEUR_MATRICES)
 	for i := 0; i < HAUTEUR_MATRICES; i++ {
 		matA[i] = make([]int, LARGEUR_MATRICES)
 		for j := 0; j < LARGEUR_MATRICES; j++ {
-			matA[i][j] = rand.Intn(100) // Default: 10000
+			matA[i][j] = rand.Intn(10000) // Default: 10000
 		}
 	}
+
+	fmt.Printf("#MATRICE B START")
 
 	matB = make([][]int, HAUTEUR_MATRICES)
 	for i := 0; i < HAUTEUR_MATRICES; i++ {
 		matB[i] = make([]int, LARGEUR_MATRICES)
 		for j := 0; j < LARGEUR_MATRICES; j++ {
-			matB[i][j] = rand.Intn(100) // Default: 10000
+			matB[i][j] = rand.Intn(10000) // Default: 10000
 		}
 	}
+
+	fmt.Printf("\n#END remplirMatrices\n")
 }
 
 func printMat(mat [][]int) {
 	res := ""
 	res += "\n\nMatrice\n"
-	for i := 0; i < len(mat); i++ {
-		for j := 0; j < len(mat[0]); j++ {
-			res += fmt.Sprintf("%v ", mat[i][j])
+	for i := 0; i < HAUTEUR_MATRICES; i++ {
+		for j := 0; j < LARGEUR_MATRICES; j++ {
+			res += strconv.Itoa(mat[i][j]) + " "
 		}
 		res += "\n"
 	}
-
 	fmt.Printf("%s", res)
 }
 
@@ -99,9 +104,12 @@ func main() {
 	remplirMatrices()
 	//printMatList(matList, 3)
 	//printMat(multiplication(matList))
+	fmt.Printf("#DEBUG PRINT MATA\n")
 	printMat(matA)
+	fmt.Printf("#DEBUG PRINT MATB\n")
 	printMat(matB)
 
+	fmt.Printf("#DEBUG GOROUTINES\n")
 	for i := 0; i < HAUTEUR_MATRICES; i++ {
 		wg.Add(1)
 		go multiplicationByLine(i, matA, matB)
@@ -109,6 +117,7 @@ func main() {
 
 	wg.Wait()
 
+	fmt.Printf("#DEBUG END GOROUTINES\n")
 	printMat(result)
 	timeEnd := time.Now()
 	elapsed := timeEnd.Sub(timeStart)

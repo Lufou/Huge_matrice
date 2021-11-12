@@ -5,8 +5,6 @@ On se fixe sur 2 matrices carrées d'une taille prédefinie
 On essaye d'optimiser ça.
 
 Méthodes : 
-	- Multiplication de A par B
-	- Remplir aléatoirement une matrice
 	- les goroutines
 
 Ensuite, on fera avec des tailles différentes donc méthode :
@@ -24,3 +22,12 @@ Puis, on peut laisser le choix à l'utilisateur de fixer les tailles donc :
 
 
 + Serveur TCP 
+
+
+
+
+
+-----------------------------------------------
+Faire une coroutine pour traiter x lignes
+Faire des coroutines pour print x lignes d'une matrice
+Serveur TCP
