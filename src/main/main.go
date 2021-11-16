@@ -12,10 +12,9 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-const LARGEUR_MATRICES = 50
-const HAUTEUR_MATRICES = 50
-
-const inc = 5
+const LARGEUR_MATRICES = 500
+const HAUTEUR_MATRICES = 500
+const inc = 50
 
 // Créer queue ?
 
@@ -53,8 +52,8 @@ func printMat(mat [][]int) {
 }
 
 func printMatLine(mat [][]int, from int, to int) {
-	res := ""
 	for line := from; line <= to; line++ {
+		res := ""
 		if line == 0 {
 			res += "\n\nMatrice\n"
 		}
@@ -69,6 +68,10 @@ func printMatLine(mat [][]int, from int, to int) {
 }
 
 func main() {
+	if inc == 0 || inc > 500 {
+		fmt.Print(":^)")
+		return
+	}
 	fmt.Printf("#DEBUG START\n")
 	timeStart := time.Now()
 
