@@ -55,6 +55,7 @@ func printMatLine(mat [][]int, line int) {
 	if line == 0 {
 		res += "\n\nMatrice\n"
 	}
+	res += fmt.Sprintf("\nLine %d\n", line)
 	for j := 0; j < LARGEUR_MATRICES; j++ {
 		res += fmt.Sprintf("%d ", mat[line][j])
 	}
