@@ -12,8 +12,8 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-const LARGEUR_MATRICES = 500
-const HAUTEUR_MATRICES = 500
+const LARGEUR_MATRICES = 50
+const HAUTEUR_MATRICES = 50
 
 // Créer queue ?
 
@@ -84,7 +84,9 @@ func main() {
 	for i := 0; i < HAUTEUR_MATRICES; i++ {
 		wg.Add(1)
 		go printMatLine(result, i)
+		time.Sleep(time.Millisecond)
 	}
+
 
 	wg.Wait()
 	fmt.Printf("#DEBUG ALL PRINTLINES GOROUTINES ENDED\n")
