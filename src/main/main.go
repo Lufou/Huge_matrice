@@ -12,10 +12,10 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-const LARGEUR_MATRICES = 50
-const HAUTEUR_MATRICES = 50
+const LARGEUR_MATRICES = 1000
+const HAUTEUR_MATRICES = 1000
 
-const inc = 5
+const inc = 100
 
 // Créer queue ?
 
@@ -53,8 +53,8 @@ func printMat(mat [][]int) {
 }
 
 func printMatLine(mat [][]int, from int, to int) {
-	res := ""
-	for line := from; line <= to; line++ {
+	for line := from; line < to; line++ {
+		res := ""
 		if line == 0 {
 			res += "\n\nMatrice\n"
 		}
@@ -64,8 +64,10 @@ func printMatLine(mat [][]int, from int, to int) {
 		}
 		res += "\n"
 		fmt.Printf("%s", res)
+
 	}
 	wg.Done()
+	
 }
 
 func main() {
@@ -87,8 +89,8 @@ func main() {
 
 	for i := 0; i < HAUTEUR_MATRICES; i += inc {
 		wg.Add(1)
-		go printMatLine(result, i, i+inc-1)
-		time.Sleep(time.Millisecond)
+		go printMatLine(result, i, i+inc)
+		time.Sleep(time.Millisecond*inc)	//Cette ligne nous permet d'avoir la matrice affichée dans l'ordre
 	}
 
 	wg.Wait()
