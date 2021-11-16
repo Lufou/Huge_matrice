@@ -15,6 +15,8 @@ var matB [][]int
 const LARGEUR_MATRICES = 500
 const HAUTEUR_MATRICES = 500
 
+const inc = 5
+
 // Créer queue ?
 
 func remplirMatrices() {
@@ -50,17 +52,19 @@ func printMat(mat [][]int) {
 	fmt.Printf("%s", res)
 }
 
-func printMatLine(mat [][]int, line int) {
+func printMatLine(mat [][]int, from int, to int) {
 	res := ""
-	if line == 0 {
-		res += "\n\nMatrice\n"
+	for line := from; line <= to; line++ {
+		if line == 0 {
+			res += "\n\nMatrice\n"
+		}
+		res += fmt.Sprintf("\nLine %d\n", line)
+		for j := 0; j < LARGEUR_MATRICES; j++ {
+			res += fmt.Sprintf("%d ", mat[line][j])
+		}
+		res += "\n"
+		fmt.Printf("%s", res)
 	}
-	res += fmt.Sprintf("\nLine %d\n", line)
-	for j := 0; j < LARGEUR_MATRICES; j++ {
-		res += fmt.Sprintf("%d ", mat[line][j])
-	}
-	res += "\n"
-	fmt.Printf("%s", res)
 	wg.Done()
 }
 
@@ -72,18 +76,18 @@ func main() {
 	remplirMatrices()
 
 	fmt.Printf("#DEBUG START GOROUTINES\n")
-	for i := 0; i < HAUTEUR_MATRICES; i++ {
+	for i := 0; i < HAUTEUR_MATRICES; i += inc {
 		wg.Add(1)
-		go multiplicationByLine(i, matA, matB)
+		go multiplicationByLine(i, i+inc-1, matA, matB)
 	}
 
 	wg.Wait()
 	fmt.Printf("#DEBUG END GOROUTINES\n")
 	fmt.Printf("#DEBUG START GOROUTINES PRINTLINES\n")
 
-	for i := 0; i < HAUTEUR_MATRICES; i++ {
+	for i := 0; i < HAUTEUR_MATRICES; i += inc {
 		wg.Add(1)
-		go printMatLine(result, i)
+		go printMatLine(result, i, i+inc-1)
 	}
 
 	wg.Wait()
@@ -93,11 +97,13 @@ func main() {
 	fmt.Printf("Time elapsed : %d", elapsed.Milliseconds())
 }
 
-func multiplicationByLine(line int, matA [][]int, matB [][]int) {
-	result[line] = make([]int, LARGEUR_MATRICES)
-	for j := 0; j < LARGEUR_MATRICES; j++ {
-		for l := 0; l < HAUTEUR_MATRICES; l++ {
-			result[line][j] = result[line][j] + matA[line][l]*matB[l][j]
+func multiplicationByLine(from int, to int, matA [][]int, matB [][]int) {
+	for line := from; line <= to; line++ {
+		result[line] = make([]int, LARGEUR_MATRICES)
+		for j := 0; j < LARGEUR_MATRICES; j++ {
+			for l := 0; l < HAUTEUR_MATRICES; l++ {
+				result[line][j] = result[line][j] + matA[line][l]*matB[l][j]
+			}
 		}
 	}
 	wg.Done()
