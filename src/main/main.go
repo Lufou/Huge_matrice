@@ -12,8 +12,8 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-const LARGEUR_MATRICES = 500
-const HAUTEUR_MATRICES = 500
+const LARGEUR_MATRICES = 50
+const HAUTEUR_MATRICES = 50
 
 const inc = 5
 
@@ -88,6 +88,7 @@ func main() {
 	for i := 0; i < HAUTEUR_MATRICES; i += inc {
 		wg.Add(1)
 		go printMatLine(result, i, i+inc-1)
+		time.Sleep(time.Millisecond)
 	}
 
 	wg.Wait()
