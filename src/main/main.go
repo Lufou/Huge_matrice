@@ -12,16 +12,11 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-<<<<<<< HEAD
-const LARGEUR_MATRICES = 1000
-const HAUTEUR_MATRICES = 1000
 
-const inc = 100
-=======
-const LARGEUR_MATRICES = 500
-const HAUTEUR_MATRICES = 500
-const inc = 50
->>>>>>> 8040cb6ab0fd2c8d800076a00795f5fd9ee30fd4
+const LARGEUR_MATRICES = 2000
+const HAUTEUR_MATRICES = 2000
+const inc = 200
+
 
 // Créer queue ?
 
@@ -59,11 +54,7 @@ func printMat(mat [][]int) {
 }
 
 func printMatLine(mat [][]int, from int, to int) {
-<<<<<<< HEAD
 	for line := from; line < to; line++ {
-=======
-	for line := from; line <= to; line++ {
->>>>>>> 8040cb6ab0fd2c8d800076a00795f5fd9ee30fd4
 		res := ""
 		if line == 0 {
 			res += "\n\nMatrice\n"
