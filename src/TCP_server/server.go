@@ -108,8 +108,8 @@ func handleConnection(connection net.Conn, connum int) {
 		}
 		//Then return OK to client
 		io.WriteString(connection, fmt.Sprintf("%s\n", "Good matrix size received."))
+		//Check if mat can multiplied (with possibleProduct function)
 		//Prints the 2 mat to client?
-
 		//Do the calculation of mat multiplication
 		//Say DONE to the client with the elapsed time
 		//Then send to the client each lines with id (in tuples)?

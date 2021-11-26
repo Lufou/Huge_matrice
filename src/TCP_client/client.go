@@ -73,22 +73,5 @@ func main() {
 			fmt.Printf("#DEBUG server decided to end the connection.")
 			return
 		}
-
-		/*for i:= 0; i < 10; i++{
-
-			io.WriteString(conn, fmt.Sprintf("Coucou %d\n", i))
-
-			resultString, err := reader.ReadString('\n')
-			if (err != nil){
-				fmt.Printf("DEBUG MAIN could not read from server")
-				os.Exit(1)
-			}
-			resultString = strings.TrimSuffix(resultString, "\n")
-			fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
-			time.Sleep(1000 * time.Millisecond)
-
-		}*/
-
 	}
-
 }
