@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"strconv"
 	"strings"
-    "io"
 )
 
 func getArgs() int {
@@ -26,7 +26,6 @@ func getArgs() int {
 		}
 
 	}
-    //PFR should never be reached
 	return -1
 }
 
@@ -44,7 +43,7 @@ func main() {
 
 	//If we're here, we did not panic and ln is a valid listener
 
-    connum := 1
+	connum := 1
 
 	for {
 		fmt.Printf("#DEBUG MAIN Accepting next connection\n")
@@ -59,7 +58,7 @@ func main() {
 		//If we're here, we did not panic and conn is a valid handler to the new connection
 
 		go handleConnection(conn, connum)
-        connum +=1
+		connum += 1
 
 	}
 }
@@ -68,26 +67,28 @@ func handleConnection(connection net.Conn, connum int) {
 
 	defer connection.Close()
 	connReader := bufio.NewReader(connection)
-	//    if err !=nil{
-	//        fmt.Printf("#DEBUG %d handleConnection could not create reader\n", connum)
-	//        return
-	//    }
 
 	for {
 		inputLine, err := connReader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
-            fmt.Printf("Error :|%s|\n", err.Error())
+			fmt.Printf("Error :|%s|\n", err.Error())
 			break
 		}
 
-		//fmt.Printf("#DEBUG RCV |%s|\n", inputLine)
 		inputLine = strings.TrimSuffix(inputLine, "\n")
 		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
-        splitLine := strings.Split(inputLine, " ")
-        returnedString := splitLine[len(splitLine)-1]
-        fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
-         io.WriteString(connection, fmt.Sprintf("%s\n", returnedString))
+		//Check each int and see if it's real ints
+		//Then return OK to client
+		//Prints the 2 mat to client?
+		//Do the calculation of mat multiplication
+		//Say DONE to the client with the elapsed time
+		//Then send to the client each lines with id (in tuples)?
+		//And the client will reassemble them (pretty quick I think) to print the whole mat
+
+		returnedString := "OK"
+		fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
+		io.WriteString(connection, fmt.Sprintf("%s\n", returnedString))
 	}
 
 }
