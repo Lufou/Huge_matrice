@@ -61,6 +61,15 @@ func main() {
 		connum += 1
 
 	}
+
+	func possibleProduct(rA int, cA int, rB int, cB int) (check bool) {
+		if cA != rB {
+			fmt.Print("Multiplication de matrices impossible")
+			return false
+		} else {
+			fmt.Print("Multiplication de matrices possible")
+			return true
+		}
 }
 
 func handleConnection(connection net.Conn, connum int) {
