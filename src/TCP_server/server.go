@@ -62,14 +62,16 @@ func main() {
 
 	}
 
-	func possibleProduct(rA int, cA int, rB int, cB int) (check bool) {
-		if cA != rB {
-			fmt.Print("Multiplication de matrices impossible")
-			return false
-		} else {
-			fmt.Print("Multiplication de matrices possible")
-			return true
-		}
+}
+
+func possibleProduct(rA int, cA int, rB int, cB int) {
+	if cA != rB {
+		fmt.Print("Multiplication de matrices impossible")
+		return false
+	} else {
+		fmt.Print("Multiplication de matrices possible")
+		return true
+	}
 }
 
 func handleConnection(connection net.Conn, connum int) {
@@ -88,7 +90,6 @@ func handleConnection(connection net.Conn, connum int) {
 		inputLine = strings.TrimSuffix(inputLine, "\n")
 		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
 		//Check each int and see if it's real ints
-		//Check if mat can multiplied (with possibleProduct function)
 		//Then return OK to client
 		//Prints the 2 mat to client?
 		//Do the calculation of mat multiplication
