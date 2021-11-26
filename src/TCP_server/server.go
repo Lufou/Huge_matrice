@@ -11,7 +11,6 @@ import (
 )
 
 func getArgs() int {
-
 	if len(os.Args) != 2 {
 		fmt.Printf("Usage: go run server.go <portnumber>\n")
 		os.Exit(1)
@@ -80,6 +79,7 @@ func handleConnection(connection net.Conn, connum int) {
 	connReader := bufio.NewReader(connection)
 
 	for {
+		io.WriteString(connection, fmt.Sprintf("%s\n", "Hello, please provide matrix sizes"))
 		inputLine, err := connReader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
@@ -90,8 +90,26 @@ func handleConnection(connection net.Conn, connum int) {
 		inputLine = strings.TrimSuffix(inputLine, "\n")
 		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
 		//Check each int and see if it's real ints
+		splitLine := strings.Split(inputLine, " ")
+		str_hauteur_mat1 := splitLine[0]
+		str_largeur_mat1 := splitLine[1]
+		str_hauteur_mat2 := splitLine[2]
+		str_largeur_mat2 := splitLine[3]
+
+		hauteur_mat1, err1 := strconv.ParseUint(str_hauteur_mat1, 10, 32)
+		largeur_mat1, err2 := strconv.ParseUint(str_largeur_mat1, 10, 32)
+		hauteur_mat2, err3 := strconv.ParseUint(str_hauteur_mat2, 10, 32)
+		largeur_mat2, err4 := strconv.ParseUint(str_largeur_mat2, 10, 32)
+
+		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 {
+			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong matrix sizes provided."))
+			fmt.Printf("#DEBUG %d RCV ERROR : wrong mat sizes, no panic, just a client\n", connum)
+			break
+		}
 		//Then return OK to client
+		io.WriteString(connection, fmt.Sprintf("%s\n", "Good matrix size received."))
 		//Prints the 2 mat to client?
+
 		//Do the calculation of mat multiplication
 		//Say DONE to the client with the elapsed time
 		//Then send to the client each lines with id (in tuples)?

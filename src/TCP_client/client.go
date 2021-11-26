@@ -45,6 +45,13 @@ func main() {
 		defer conn.Close()
 		reader := bufio.NewReader(conn)
 		fmt.Printf("#DEBUG MAIN connected\n")
+		resultString, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("DEBUG MAIN could not read from server")
+			os.Exit(1)
+		}
+		resultString = strings.TrimSuffix(resultString, "\n")
+		fmt.Printf("#DEBUG server input : |%s|\n", resultString)
 		var hauteur_mat1 string
 		var largeur_mat1 string
 		var hauteur_mat2 string
@@ -55,13 +62,17 @@ func main() {
 		fmt.Scanf("%s", &largeur_mat2)
 
 		io.WriteString(conn, fmt.Sprintf("%s %s %s %s\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2))
-		resultString, err := reader.ReadString('\n')
+		resultString, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("DEBUG MAIN could not read from server")
 			os.Exit(1)
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
 		fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
+		if strings.Contains(resultString, "end") {
+			fmt.Printf("#DEBUG server decided to end the connection.")
+			return
+		}
 
 		/*for i:= 0; i < 10; i++{
 
