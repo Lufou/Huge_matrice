@@ -64,7 +64,7 @@ func main() {
 
 }
 
-func possibleProduct(rA int, cA int, rB int, cB int) {
+func possibleProduct(rA int, cA int, rB int, cB int) bool {
 	if cA != rB {
 		fmt.Print("Multiplication de matrices impossible")
 		return false
