@@ -1,4 +1,4 @@
-package main
+package mainv2
 
 import (
 	"fmt"
@@ -16,7 +16,6 @@ const LARGEUR_MATRICES = 2000
 const HAUTEUR_MATRICES = 2000
 
 const inc = 200
-
 
 // Créer queue ?
 
@@ -41,7 +40,6 @@ func remplirMatrices() {
 	fmt.Printf("\n#DEBUG END remplirMatrices\n")
 }
 
-
 func main() {
 	if inc == 0 || inc > 500 {
 		fmt.Print(":^)")
@@ -57,12 +55,12 @@ func main() {
 	for i := 0; i < HAUTEUR_MATRICES; i += inc {
 		wg.Add(1)
 		go multiplicationByLine(i, i+inc-1, matA, matB)
-		time.Sleep(time.Millisecond*inc)	//Cette ligne nous permet d'avoir la matrice affichée dans l'ordre
+		time.Sleep(time.Millisecond * inc) //Cette ligne nous permet d'avoir la matrice affichée dans l'ordre
 	}
 
 	wg.Wait()
 	fmt.Printf("#DEBUG END GOROUTINES\n")
-	
+
 	timeEnd := time.Now()
 	elapsed := timeEnd.Sub(timeStart)
 	fmt.Printf("Time elapsed : %d", elapsed.Milliseconds())
