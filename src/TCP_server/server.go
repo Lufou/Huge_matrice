@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 )
+
+const inc = 200
 
 func getArgs() int {
 	if len(os.Args) != 2 {
@@ -65,10 +68,8 @@ func main() {
 
 func possibleProduct(rA int, cA int, rB int, cB int) bool {
 	if cA != rB {
-		fmt.Print("Multiplication de matrices impossible")
 		return false
 	} else {
-		fmt.Print("Multiplication de matrices possible")
 		return true
 	}
 }
@@ -79,6 +80,8 @@ func handleConnection(connection net.Conn, connum int) {
 	connReader := bufio.NewReader(connection)
 
 	for {
+		//var wg sync.WaitGroup
+		//var result [][]int
 		io.WriteString(connection, fmt.Sprintf("%s\n", "Hello, please provide matrix sizes"))
 		inputLine, err := connReader.ReadString('\n')
 		if err != nil {
@@ -96,20 +99,44 @@ func handleConnection(connection net.Conn, connum int) {
 		str_hauteur_mat2 := splitLine[2]
 		str_largeur_mat2 := splitLine[3]
 
-		hauteur_mat1, err1 := strconv.ParseUint(str_hauteur_mat1, 10, 32)
-		largeur_mat1, err2 := strconv.ParseUint(str_largeur_mat1, 10, 32)
-		hauteur_mat2, err3 := strconv.ParseUint(str_hauteur_mat2, 10, 32)
-		largeur_mat2, err4 := strconv.ParseUint(str_largeur_mat2, 10, 32)
+		hauteur_mat1, err1 := strconv.Atoi(str_hauteur_mat1)
+		largeur_mat1, err2 := strconv.Atoi(str_largeur_mat1)
+		hauteur_mat2, err3 := strconv.Atoi(str_hauteur_mat2)
+		largeur_mat2, err4 := strconv.Atoi(str_largeur_mat2)
 
 		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 {
 			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong matrix sizes provided."))
 			fmt.Printf("#DEBUG %d RCV ERROR : wrong mat sizes, no panic, just a client\n", connum)
 			break
 		}
-		//Then return OK to client
-		io.WriteString(connection, fmt.Sprintf("%s\n", "Good matrix size received."))
+
 		//Check if mat can multiplied (with possibleProduct function)
+		if !possibleProduct(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2) {
+			io.WriteString(connection, fmt.Sprintf("%send\n", "Matrix cannot be multiplied."))
+			fmt.Printf("#DEBUG %d RCV ERROR : matrix cannot be multiplied, no panic, just a client\n", connum)
+			break
+		}
+
+		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix can be multiplied, enter matrix int max value"))
+		//Matrix generation
+		inputLine, err = connReader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
+			fmt.Printf("Error :|%s|\n", err.Error())
+			break
+		}
+		inputLine = strings.TrimSuffix(inputLine, "\n")
+		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
+		int_max_value, err := strconv.Atoi(inputLine)
+		if err != nil {
+			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong int provided."))
+			fmt.Printf("#DEBUG %d RCV ERROR : wrong int provided, no panic, just a client\n", connum)
+			break
+		}
+		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix generations has begun."))
+		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 		//Prints the 2 mat to client?
+		fmt.Print(matA[0], matB[0])
 		//Do the calculation of mat multiplication
 		//Say DONE to the client with the elapsed time
 		//Then send to the client each lines with id (in tuples)?
@@ -119,5 +146,27 @@ func handleConnection(connection net.Conn, connum int) {
 		fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
 		io.WriteString(connection, fmt.Sprintf("%s\n", returnedString))
 	}
+}
 
+func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {
+	fmt.Printf("#DEBUG START remplirMatrices\n")
+	matA := make([][]int, hauteur_matA)
+	for i := 0; i < hauteur_matA; i++ {
+		matA[i] = make([]int, largeur_matA)
+		for j := 0; j < largeur_matA; j++ {
+			matA[i][j] = rand.Intn(max_value) // Default: 10000
+		}
+	}
+
+	matB := make([][]int, hauteur_matB)
+	for i := 0; i < hauteur_matB; i++ {
+		matB[i] = make([]int, largeur_matB)
+		for j := 0; j < largeur_matB; j++ {
+			matB[i][j] = rand.Intn(max_value) // Default: 10000
+		}
+	}
+
+	fmt.Printf("\n#DEBUG END remplirMatrices\n")
+
+	return matA, matB
 }
