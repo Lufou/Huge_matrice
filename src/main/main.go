@@ -12,8 +12,8 @@ var result [][]int
 var matA [][]int
 var matB [][]int
 
-const LARGEUR_MATRICES = 2000
-const HAUTEUR_MATRICES = 2000
+const LARGEUR_MATRICES = 2000 // initialisation de la largeur de la matrice
+const HAUTEUR_MATRICES = 2000 // initialisationd de la hauteur de la matrice
 const inc = 200
 
 // Créer queue ?
@@ -92,7 +92,8 @@ func main() {
 	fmt.Printf("#DEBUG END GOROUTINES\n") // debug
 	fmt.Printf("#DEBUG START GOROUTINES PRINTLINES\n") // debug
 
-	for i := 0; i < HAUTEUR_MATRICES; i += inc {
+	for i := 0; i < HAUTEUR_MATRICES; i += inc { // parcours des lignes de la matrice de 0 à inc 
+		//si on a initialisé int à 200, la goroutine va afficher les lignes de la matrice 200 par 200
 		wg.Add(1) // ajout d'un token
 		go printMatLine(result, i, i+inc) // lancement des goroutines qui affichent les lignes
 		time.Sleep(time.Millisecond * inc) //Cette ligne nous permet d'avoir la matrice affichée dans l'ordre
