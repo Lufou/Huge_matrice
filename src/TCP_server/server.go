@@ -149,24 +149,26 @@ func handleConnection(connection net.Conn, connum int) {
 }
 
 func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {
-	fmt.Printf("#DEBUG START remplirMatrices\n")
-	matA := make([][]int, hauteur_matA)
-	for i := 0; i < hauteur_matA; i++ {
-		matA[i] = make([]int, largeur_matA)
-		for j := 0; j < largeur_matA; j++ {
+	fmt.Printf("#DEBUG START remplirMatrices\n") // debug
+	matA := make([][]int, hauteur_matA)          // déclaration du tableau contenant le nombre de lignes de la matrice A
+	for i := 0; i < hauteur_matA; i++ {          // parcours de la matrice A par lignes
+		matA[i] = make([]int, largeur_matA) // pour chaque ligne i, on génère un tableau contenant [largeur_matA] colonnes
+		for j := 0; j < largeur_matA; j++ { // parcours de la matrice par colonnes
 			matA[i][j] = rand.Intn(max_value) // Default: 10000
+			// remplissage de l'élément [i][j] de matA par une valeur aléatoire comprise entre 1 et max_value
 		}
 	}
 
-	matB := make([][]int, hauteur_matB)
-	for i := 0; i < hauteur_matB; i++ {
-		matB[i] = make([]int, largeur_matB)
-		for j := 0; j < largeur_matB; j++ {
+	matB := make([][]int, hauteur_matB) // déclaration du tableau contenant le nombre de lignes de la matrice B
+	for i := 0; i < hauteur_matB; i++ { // parcours de la matrice B par lignes
+		matB[i] = make([]int, largeur_matB) // pour chaque ligne i, on génère un tableau contenant [largeur_matB] colonnes
+		for j := 0; j < largeur_matB; j++ { // parcours de la matrice par colonnes
 			matB[i][j] = rand.Intn(max_value) // Default: 10000
+			// remplissage de l'élément [i][j] de matB par une valeur aléatoire comprise entre 1 et max_value
 		}
 	}
 
-	fmt.Printf("\n#DEBUG END remplirMatrices\n")
+	fmt.Printf("\n#DEBUG END remplirMatrices\n") // debug
 
 	return matA, matB
 }
