@@ -18,6 +18,8 @@ type matrix_line struct {
 }
 
 const inc = 5
+var numGoroutine int
+var wg sync.WaitGroup
 
 func getArgs() int {
 	if len(os.Args) != 2 {
@@ -128,13 +130,16 @@ func handleConnection(connection net.Conn, connum int) {
 		//Prints the 2 mat to client?
 
 		//Do the calculation of mat multiplication
-		var wg sync.WaitGroup
+		
 		result := make([][]int, hauteur_mat1)
 		//var result [][]int
 		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
-		for i := 0; i < hauteur_mat1; i += inc {
+		numGoroutine = 0
+		for i := 0; i < hauteur_mat1; i += int_max_value {
+			fmt.Println(i)
+			numGoroutine+=1
 			wg.Add(1)                                                   // ajout d'un token
-			go multiplicationByLine(wg, i, i+inc-1, matA, matB, result) // lancement des goroutines qui effectuent le calcul
+			go multiplicationByLine(i, i+int_max_value-1, matA, matB, result, numGoroutine, connum, connection) // lancement des goroutines qui effectuent le calcul
 		}
 
 		wg.Wait()                                                     // on attend ici que le nombre de tokens soit nul
@@ -152,16 +157,31 @@ func handleConnection(connection net.Conn, connum int) {
 	}
 }
 
-func multiplicationByLine(wg sync.WaitGroup, from int, to int, matA [][]int, matB [][]int, result [][]int) {
+func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, numGoroutine int, connum int, connection net.Conn) {
+	//Creation structure
+	var matrix matrix_line 
+	matrix.id=numGoroutine
+	matrix.line_string=""
+
 	for line := from; line <= to; line++ { // parcours des lignes de la matrice résultat
+		matrix.line_string += "\n" + " Line " + strconv.Itoa(line) + " : " + "\n"
 		result[line] = make([]int, len(matB[line])) // déclaration du tableau stockant une ligne de résultats
 		for j := 0; j < len(matB[line]); j++ {      // parcours des colonnes de la matrice
 			for l := 0; l < len(matB); l++ { // parcours des lignes de la matrice
 				result[line][j] = result[line][j] + matA[line][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
 			}
+			matrix.line_string +=strconv.Itoa(result[line][j]) + " "
 		}
 	}
-	wg.Done()
+	wg.Done()	
+	
+	//envoi vers une méthode qui permet d'envoyer la struct
+	envoiStruct(matrix, connum, connection)
+}
+
+func envoiStruct(matrix matrix_line, connum int, connection net.Conn){
+	fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, matrix.id, "\n", matrix.line_string, "\n")
+	io.WriteString(connection, fmt.Sprintf("%s\n", matrix.id, matrix.line_string))
 }
 
 func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {
