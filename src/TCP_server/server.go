@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type matrix_line struct {
@@ -16,7 +17,7 @@ type matrix_line struct {
 	line_string string
 }
 
-const inc = 200
+const inc = 5
 
 func getArgs() int {
 	if len(os.Args) != 2 {
@@ -85,8 +86,6 @@ func handleConnection(connection net.Conn, connum int) {
 	connReader := bufio.NewReader(connection)
 
 	for {
-		//var wg sync.WaitGroup
-		//var result [][]int
 		inputLine, err := connReader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
@@ -112,7 +111,7 @@ func handleConnection(connection net.Conn, connum int) {
 
 		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 || int_max_value <= 0 {
 			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong argument provided."))
-			fmt.Printf("#DEBUG %d RCV ERROR : wrong mat sizes, no panic, just a client\n", connum)
+			fmt.Printf("#DEBUG %d RCV ERROR : wrong arguments, no panic, just a client\n", connum)
 			break
 		}
 
@@ -127,16 +126,42 @@ func handleConnection(connection net.Conn, connum int) {
 		//Matrix generation
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 		//Prints the 2 mat to client?
-		fmt.Print(matA[0], matB[0])
+
 		//Do the calculation of mat multiplication
+		var wg sync.WaitGroup
+		result := make([][]int, hauteur_mat1)
+		//var result [][]int
+		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
+		for i := 0; i < hauteur_mat1; i += inc {
+			wg.Add(1)                                                   // ajout d'un token
+			go multiplicationByLine(wg, i, i+inc-1, matA, matB, result) // lancement des goroutines qui effectuent le calcul
+		}
+
+		wg.Wait()                                                     // on attend ici que le nombre de tokens soit nul
+		fmt.Printf("#DEBUG %d END GOROUTINES\n", connum)              // debug
+		fmt.Printf("#DEBUG %d START GOROUTINES PRINTLINES\n", connum) // debug
+
 		//Say DONE to the client with the elapsed time
-		//Then send to the client each lines with id (in tuples)?
+		//Then send to the client each lines with id (in struct)
+
 		//And the client will reassemble them (pretty quick I think) to print the whole mat
 
 		returnedString := "OK"
 		fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
 		io.WriteString(connection, fmt.Sprintf("%s\n", returnedString))
 	}
+}
+
+func multiplicationByLine(wg sync.WaitGroup, from int, to int, matA [][]int, matB [][]int, result [][]int) {
+	for line := from; line <= to; line++ { // parcours des lignes de la matrice résultat
+		result[line] = make([]int, len(matB[line])) // déclaration du tableau stockant une ligne de résultats
+		for j := 0; j < len(matB[line]); j++ {      // parcours des colonnes de la matrice
+			for l := 0; l < len(matB); l++ { // parcours des lignes de la matrice
+				result[line][j] = result[line][j] + matA[line][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
+			}
+		}
+	}
+	wg.Done()
 }
 
 func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {

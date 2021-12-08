@@ -70,6 +70,5 @@ func main() {
 			fmt.Printf("#DEBUG server decided to end the connection.")
 			return
 		}
-
 	}
 }
