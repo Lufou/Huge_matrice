@@ -10,26 +10,29 @@ import (
 	"strings"
 )
 
-func getArgs() int {
-	if len(os.Args) != 2 {
-		fmt.Printf("Usage: go run client.go <portnumber>\n")
+func getArgs() (int, int, int, int, int, int) {
+	if len(os.Args) != 7 {
+		fmt.Printf("Usage: go run client.go <portnumber> <mat1_height> <mat1_width> <mat2_height> <mat2_width> <max_int_value>\n")
 		os.Exit(1)
 	} else {
-		fmt.Printf("#DEBUG ARGS Port Number : %s\n", os.Args[1])
 		portNumber, err := strconv.Atoi(os.Args[1])
-		if err != nil {
-			fmt.Printf("Usage: go run client.go <portnumber>\n")
+		mat1_height, err1 := strconv.Atoi(os.Args[2])
+		mat1_width, err2 := strconv.Atoi(os.Args[3])
+		mat2_height, err3 := strconv.Atoi(os.Args[4])
+		mat2_width, err4 := strconv.Atoi(os.Args[5])
+		max_int_value, err5 := strconv.Atoi(os.Args[6])
+		if err != nil || err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
+			fmt.Printf("Usage: go run client.go <portnumber> <mat1_height> <mat1_width> <mat2_height> <mat2_width> <max_int_value>\n")
 			os.Exit(1)
 		} else {
-			return portNumber
+			return portNumber, mat1_height, mat1_width, mat2_height, mat2_width, max_int_value
 		}
-
 	}
-	return -1
+	return -1, -1, -1, -1, -1, -1
 }
 
 func main() {
-	port := getArgs()
+	port, hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value := getArgs()
 	fmt.Printf("#DEBUG DIALING TCP Server on port %d\n", port)
 	portString := fmt.Sprintf("127.0.0.1:%s", strconv.Itoa(port))
 	fmt.Printf("#DEBUG MAIN PORT STRING |%s|\n", portString)
@@ -42,45 +45,27 @@ func main() {
 		defer conn.Close()
 		reader := bufio.NewReader(conn)
 		fmt.Printf("#DEBUG MAIN connected\n")
+
+		io.WriteString(conn, fmt.Sprintf("%d %d %d %d %d\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value))
 		resultString, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("#DEBUG MAIN could not read from server")
 			os.Exit(1)
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
-		fmt.Printf("#DEBUG server input : |%s|\n", resultString)
-		var hauteur_mat1 string
-		var largeur_mat1 string
-		var hauteur_mat2 string
-		var largeur_mat2 string
-		fmt.Scanf("%s", &hauteur_mat1)
-		fmt.Scanf("%s", &largeur_mat1)
-		fmt.Scanf("%s", &hauteur_mat2)
-		fmt.Scanf("%s", &largeur_mat2)
-
-		io.WriteString(conn, fmt.Sprintf("%s %s %s %s\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2))
-		resultString, err = reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("#DEBUG MAIN could not read from server")
-			os.Exit(1)
-		}
-		resultString = strings.TrimSuffix(resultString, "\n")
-		fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
+		fmt.Printf("#DEBUG server replied : |%s|\n", strings.Replace(resultString, "end", "", 1))
 		if strings.Contains(resultString, "end") {
 			fmt.Printf("#DEBUG server decided to end the connection.")
 			return
 		}
 
-		var max_int_value string
-		fmt.Scanf("%s\n", &max_int_value)
-		io.WriteString(conn, fmt.Sprintf("%s\n", max_int_value))
 		resultString, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("DEBUG MAIN could not read from server")
 			os.Exit(1)
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
-		fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
+		fmt.Printf("#DEBUG server replied : |%s|\n", strings.Replace(resultString, "end", "", 1))
 		if strings.Contains(resultString, "end") {
 			fmt.Printf("#DEBUG server decided to end the connection.")
 			return
