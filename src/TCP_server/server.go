@@ -11,6 +11,11 @@ import (
 	"strings"
 )
 
+type matrix_line struct {
+	id          int
+	line_string string
+}
+
 const inc = 200
 
 func getArgs() int {
@@ -82,7 +87,6 @@ func handleConnection(connection net.Conn, connum int) {
 	for {
 		//var wg sync.WaitGroup
 		//var result [][]int
-		io.WriteString(connection, fmt.Sprintf("%s\n", "Hello, please provide matrix sizes"))
 		inputLine, err := connReader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
@@ -98,14 +102,16 @@ func handleConnection(connection net.Conn, connum int) {
 		str_largeur_mat1 := splitLine[1]
 		str_hauteur_mat2 := splitLine[2]
 		str_largeur_mat2 := splitLine[3]
+		str_int_max_value := splitLine[4]
 
 		hauteur_mat1, err1 := strconv.Atoi(str_hauteur_mat1)
 		largeur_mat1, err2 := strconv.Atoi(str_largeur_mat1)
 		hauteur_mat2, err3 := strconv.Atoi(str_hauteur_mat2)
 		largeur_mat2, err4 := strconv.Atoi(str_largeur_mat2)
+		int_max_value, err5 := strconv.Atoi(str_int_max_value)
 
-		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 {
-			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong matrix sizes provided."))
+		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 || int_max_value <= 0 {
+			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong argument provided."))
 			fmt.Printf("#DEBUG %d RCV ERROR : wrong mat sizes, no panic, just a client\n", connum)
 			break
 		}
@@ -117,23 +123,8 @@ func handleConnection(connection net.Conn, connum int) {
 			break
 		}
 
-		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix can be multiplied, enter matrix int max value"))
+		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix can be multiplied"))
 		//Matrix generation
-		inputLine, err = connReader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
-			fmt.Printf("Error :|%s|\n", err.Error())
-			break
-		}
-		inputLine = strings.TrimSuffix(inputLine, "\n")
-		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
-		int_max_value, err := strconv.Atoi(inputLine)
-		if err != nil {
-			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong int provided."))
-			fmt.Printf("#DEBUG %d RCV ERROR : wrong int provided, no panic, just a client\n", connum)
-			break
-		}
-		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix generations has begun."))
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 		//Prints the 2 mat to client?
 		fmt.Print(matA[0], matB[0])
