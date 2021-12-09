@@ -13,13 +13,11 @@ import (
 )
 
 type matrix_line struct {
-	id          string
+	id          int
 	line_string string
 }
 
 const inc = 5
-var numGoroutine int
-var wg sync.WaitGroup
 
 func getArgs() int {
 	if len(os.Args) != 2 {
@@ -129,21 +127,15 @@ func handleConnection(connection net.Conn, connum int) {
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 		//Prints the 2 mat to client?
 
-		//Tell the client how many things I will send
-		returnedNbSending := strconv.Itoa(100)
-		fmt.Printf("#DEBUG %d How many sending ? \n", connum, returnedNbSending)
-		io.WriteString(connection, fmt.Sprintf("%s\n", returnedNbSending))
-
 		//Do the calculation of mat multiplication
 		result := make([][]int, hauteur_mat1)
+		var wg sync.WaitGroup
 		//var result [][]int
 		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
-		numGoroutine = 0
-		for i := 0; i < hauteur_mat1; i += int_max_value {
+		for i := 0; i < hauteur_mat1; i += inc {
 			fmt.Println(i)
-			numGoroutine+=1
-			wg.Add(1)                                                   // ajout d'un token
-			go multiplicationByLine(i, i+int_max_value-1, matA, matB, result, numGoroutine, connum, connection) // lancement des goroutines qui effectuent le calcul
+			wg.Add(1)                                                                       // ajout d'un token
+			go multiplicationByLine(wg, i, i+inc-1, matA, matB, result, connum, connection) // lancement des goroutines qui effectuent le calcul
 		}
 
 		wg.Wait()                                                     // on attend ici que le nombre de tokens soit nul
@@ -161,32 +153,29 @@ func handleConnection(connection net.Conn, connum int) {
 	}
 }
 
-func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, numGoroutine int, connum int, connection net.Conn) {
-	//Creation structure
-	var matrix matrix_line 
-	matrix.id=strconv.Itoa(numGoroutine)
-	matrix.line_string=""
-
-	for line := from; line <= to; line++ { // parcours des lignes de la matrice résultat
-		matrix.line_string += " Line " + strconv.Itoa(line) + " : "
-		result[line] = make([]int, len(matB[line])) // déclaration du tableau stockant une ligne de résultats
-		for j := 0; j < len(matB[line]); j++ {      // parcours des colonnes de la matrice
+func multiplicationByLine(wg sync.WaitGroup, from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
+	for line_number := from; line_number <= to; line_number++ { // parcours des lignes de la matrice résultat
+		//Creation structure
+		var matrix_line matrix_line
+		matrix_line.id = line_number
+		matrix_line.line_string = ""
+		result[line_number] = make([]int, len(matB[line_number])) // déclaration du tableau stockant une ligne de résultats
+		for j := 0; j < len(matB[line_number]); j++ {             // parcours des colonnes de la matrice
 			for l := 0; l < len(matB); l++ { // parcours des lignes de la matrice
-				result[line][j] = result[line][j] + matA[line][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
+				result[line_number][j] = result[line_number][j] + matA[line_number][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
 			}
-			matrix.line_string +=strconv.Itoa(result[line][j]) + " "
+			matrix_line.line_string += strconv.Itoa(result[line_number][j]) + " "
 		}
+		matrix_line.line_string = strings.TrimSuffix(matrix_line.line_string, " ")
+		//envoi vers une méthode qui permet d'envoyer la struct
+		go envoiStruct(matrix_line, connum, connection)
 	}
-	matrix.line_string+="\n"
-	wg.Done()	
-	
-	//envoi vers une méthode qui permet d'envoyer la struct
-	envoiStruct(matrix, connum, connection)
+	wg.Done()
 }
 
-func envoiStruct(matrix matrix_line, connum int, connection net.Conn){
-	fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, matrix.id, "\n", matrix.line_string, "\n")
-	io.WriteString(connection, fmt.Sprintf(matrix.id, matrix.line_string))
+func envoiStruct(matrix_line matrix_line, connum int, connection net.Conn) {
+	fmt.Printf("#DEBUG %d SENDING line id %d\n", connum, matrix_line.id)
+	io.WriteString(connection, fmt.Sprintf("%d %s", matrix_line.id, matrix_line.line_string))
 }
 
 func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {
