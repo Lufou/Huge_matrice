@@ -70,5 +70,22 @@ func main() {
 			fmt.Printf("#DEBUG server decided to end the connection.")
 			return
 		}
+		
+		nbRecept, err := strconv.Atoi(resultString)
+		resultString2, err := reader.ReadString('\n')
+		
+		for i :=0; i < nbRecept+1; i++{
+			resultString2, err = reader.ReadString('\n')
+			if err != nil {
+				fmt.Printf("DEBUG MAIN could not read from server")
+				os.Exit(1)
+			}
+			resultString2 = strings.TrimSuffix(resultString2, "\n")
+			fmt.Printf("#DEBUG server replied : |%s|\n", strings.Replace(resultString2, "end", "", 1))
+			if strings.Contains(resultString2, "end") {
+				fmt.Printf("#DEBUG server decided to end the connection.")
+				return
+			}
+		}
 	}
 }
