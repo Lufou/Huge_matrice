@@ -93,7 +93,7 @@ func main() {
 	fmt.Printf("#DEBUG START GOROUTINES PRINTLINES\n") // debug
 
 	for i := 0; i < HAUTEUR_MATRICES; i += inc { // parcours des lignes de la matrice de 0 à inc 
-		//si on a initialisé int à 200, la goroutine va afficher les lignes de la matrice 200 par 200
+		//si on a initialisé inc à 200, la goroutine va afficher les lignes de la matrice 200 par 200
 		wg.Add(1) // ajout d'un token
 		go printMatLine(result, i, i+inc) // lancement des goroutines qui affichent les lignes
 		time.Sleep(time.Millisecond * inc) //Cette ligne nous permet d'avoir la matrice affichée dans l'ordre
