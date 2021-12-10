@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type matrix_line struct {
@@ -97,6 +98,8 @@ func handleConnection(connection net.Conn, connum int) {
 			break
 		}
 
+		start_time := time.Now()
+
 		inputLine = strings.TrimSuffix(inputLine, "\n")
 		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
 		//Check each int and see if it's real ints
@@ -147,13 +150,11 @@ func handleConnection(connection net.Conn, connum int) {
 		fmt.Printf("#DEBUG %d START GOROUTINES PRINTLINES\n", connum) // debug
 
 		//Say DONE to the client with the elapsed time
-		//Then send to the client each lines with id (in struct)
-
-		//And the client will reassemble them (pretty quick I think) to print the whole mat
-
-		returnedString := "OK"
+		elapsed_time := time.Since(start_time)
+		returnedString := fmt.Sprintf("Done in %s", elapsed_time)
 		fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
-		io.WriteString(connection, fmt.Sprintf("%s\n", returnedString))
+		io.WriteString(connection, fmt.Sprintf("%send\n", returnedString))
+		//And the client will reassemble them (pretty quick I think) to print the whole mat
 	}
 }
 
@@ -178,7 +179,7 @@ func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [
 }
 
 func envoiStruct(matrix_line matrix_line, connum int, connection net.Conn) {
-	fmt.Printf("#DEBUG %d SENDING line id %d\n", connum, matrix_line.id)
+	//fmt.Printf("#DEBUG %d SENDING line id %d\n", connum, matrix_line.id)
 	io.WriteString(connection, fmt.Sprintf("%d %s\n", matrix_line.id, matrix_line.line_string))
 }
 
