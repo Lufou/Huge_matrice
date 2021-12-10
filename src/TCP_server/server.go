@@ -17,7 +17,9 @@ type matrix_line struct {
 	line_string string
 }
 
-const inc = 5
+const inc = 200
+
+var wg_slice []sync.WaitGroup
 
 func getArgs() int {
 	if len(os.Args) != 2 {
@@ -51,7 +53,7 @@ func main() {
 
 	//If we're here, we did not panic and ln is a valid listener
 
-	connum := 1
+	connum := 0
 
 	for {
 		fmt.Printf("#DEBUG MAIN Accepting next connection\n")
@@ -84,6 +86,8 @@ func handleConnection(connection net.Conn, connum int) {
 
 	defer connection.Close()
 	connReader := bufio.NewReader(connection)
+	var wg sync.WaitGroup
+	wg_slice = append(wg_slice, wg)
 
 	for {
 		inputLine, err := connReader.ReadString('\n')
@@ -129,16 +133,16 @@ func handleConnection(connection net.Conn, connum int) {
 
 		//Do the calculation of mat multiplication
 		result := make([][]int, hauteur_mat1)
-		var wg sync.WaitGroup
+
+		wg_slice = append(wg_slice, wg)
 		//var result [][]int
 		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
 		for i := 0; i < hauteur_mat1; i += inc {
-			fmt.Println(i)
-			wg.Add(1)                                                                       // ajout d'un token
-			go multiplicationByLine(wg, i, i+inc-1, matA, matB, result, connum, connection) // lancement des goroutines qui effectuent le calcul
+			wg_slice[connum].Add(1)                                                     // ajout d'un token
+			go multiplicationByLine(i, i+inc-1, matA, matB, result, connum, connection) // lancement des goroutines qui effectuent le calcul
 		}
 
-		wg.Wait()                                                     // on attend ici que le nombre de tokens soit nul
+		wg_slice[connum].Wait()                                       // on attend ici que le nombre de tokens soit nul
 		fmt.Printf("#DEBUG %d END GOROUTINES\n", connum)              // debug
 		fmt.Printf("#DEBUG %d START GOROUTINES PRINTLINES\n", connum) // debug
 
@@ -153,7 +157,7 @@ func handleConnection(connection net.Conn, connum int) {
 	}
 }
 
-func multiplicationByLine(wg sync.WaitGroup, from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
+func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
 	for line_number := from; line_number <= to; line_number++ { // parcours des lignes de la matrice résultat
 		//Creation structure
 		var matrix_line matrix_line
@@ -170,12 +174,12 @@ func multiplicationByLine(wg sync.WaitGroup, from int, to int, matA [][]int, mat
 		//envoi vers une méthode qui permet d'envoyer la struct
 		go envoiStruct(matrix_line, connum, connection)
 	}
-	wg.Done()
+	wg_slice[connum].Done()
 }
 
 func envoiStruct(matrix_line matrix_line, connum int, connection net.Conn) {
 	fmt.Printf("#DEBUG %d SENDING line id %d\n", connum, matrix_line.id)
-	io.WriteString(connection, fmt.Sprintf("%d %s", matrix_line.id, matrix_line.line_string))
+	io.WriteString(connection, fmt.Sprintf("%d %s\n", matrix_line.id, matrix_line.line_string))
 }
 
 func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {
