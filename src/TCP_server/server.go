@@ -18,7 +18,7 @@ type matrix_line struct {
 	line_string string
 }
 
-const inc = 200
+const inc = 1
 
 var wg_slice []sync.WaitGroup
 
@@ -132,13 +132,22 @@ func handleConnection(connection net.Conn, connum int) {
 		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix can be multiplied"))
 		//Matrix generation
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
-		//Prints the 2 mat to client?
 
+		wg_slice = append(wg_slice, wg)
+		//Prints the 2 mat to client?
+		for i := 0; i < hauteur_mat1; i += inc {
+			wg_slice[connum].Add(1)
+			go printMat(i, i+inc-1, matA, connum, connection)
+		}
+		wg_slice[connum].Wait() // on attend ici que le nombre de tokens soit nul
+		for i := 0; i < hauteur_mat2; i += inc {
+			wg_slice[connum].Add(1)
+			go printMat(i, i+inc-1, matB, connum, connection)
+		}
+		wg_slice[connum].Wait()
 		//Do the calculation of mat multiplication
 		result := make([][]int, hauteur_mat1)
 
-		wg_slice = append(wg_slice, wg)
-		//var result [][]int
 		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
 		for i := 0; i < hauteur_mat1; i += inc {
 			wg_slice[connum].Add(1)                                                     // ajout d'un token
@@ -158,24 +167,32 @@ func handleConnection(connection net.Conn, connum int) {
 	}
 }
 
-func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
-	for line_number := from; line_number <= to; line_number++ { // parcours des lignes de la matrice résultat
+func printMat(from int, to int, mat [][]int, connum int, connection net.Conn) {
+	for line_number := from; line_number <= to; line_number++ {
 		//Creation structure
 		var matrix_line matrix_line
 		matrix_line.id = line_number
 		matrix_line.line_string = ""
+		for j := 0; j < len(mat[line_number]); j++ {
+			matrix_line.line_string += strconv.Itoa(mat[line_number][j]) + " "
+		}
+		matrix_line.line_string = strings.TrimSuffix(matrix_line.line_string, " ")
+		//envoi vers une méthode qui permet d'envoyer la struct
+		envoiStruct(matrix_line, connum, connection)
+	}
+	wg_slice[connum].Done()
+}
+
+func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
+	for line_number := from; line_number <= to; line_number++ { // parcours des lignes de la matrice résultat
 		result[line_number] = make([]int, len(matB[line_number])) // déclaration du tableau stockant une ligne de résultats
 		for j := 0; j < len(matB[line_number]); j++ {             // parcours des colonnes de la matrice
 			for l := 0; l < len(matB); l++ { // parcours des lignes de la matrice
 				result[line_number][j] = result[line_number][j] + matA[line_number][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
 			}
-			matrix_line.line_string += strconv.Itoa(result[line_number][j]) + " "
 		}
-		matrix_line.line_string = strings.TrimSuffix(matrix_line.line_string, " ")
-		//envoi vers une méthode qui permet d'envoyer la struct
-		go envoiStruct(matrix_line, connum, connection)
 	}
-	wg_slice[connum].Done()
+	go printMat(from, to, result, connum, connection)
 }
 
 func envoiStruct(matrix_line matrix_line, connum int, connection net.Conn) {
