@@ -1,4 +1,4 @@
-package main
+/*package main
 
 import (
 	"fmt"
@@ -117,3 +117,4 @@ func multiplicationByLine(from int, to int, matA [][]int, matB [][]int) {
 	}
 	wg.Done()
 }
+*/
