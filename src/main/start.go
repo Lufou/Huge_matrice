@@ -19,7 +19,7 @@ func main() {
 		fmt.Printf("Incorrect arg passed, start.go <number of clients>")
 		os.Exit(1)
 	}
-	s := []string{"go", "run", "../TCP_server/server.go"} // LINUX PART TO DO
+	s := []string{"./server"} // LINUX PART TO DO
 	if runtime.GOOS == "windows" {
 		s = []string{"cmd.exe", "/k", "cmd", "/C", "start", "./server.exe", "6000"}
 	}
@@ -28,7 +28,7 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 	for i := 0; i < client_amount; i++ {
-		s := []string{"go", "run", "../TCP_client/client.go"} // LINUX PART TO DO
+		s := []string{"./client"} // LINUX PART TO DO
 		if runtime.GOOS == "windows" {
 			s = []string{"cmd.exe", "/k", "cmd", "/C", "start", "./client.exe", "6000", "50", "50", "50", "50", "10"}
 		}
