@@ -18,7 +18,7 @@ type matrix_line struct {
 	line_string string
 }
 
-const inc = 1
+var inc = 1
 
 var wg_slice []sync.WaitGroup
 
@@ -130,18 +130,33 @@ func handleConnection(connection net.Conn, connum int) {
 		}
 
 		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix can be multiplied"))
+
 		//Matrix generation
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 
 		wg_slice = append(wg_slice, wg)
 		//Prints the 2 mat to client?
+		inc = hauteur_mat1 / 10
+		if inc == 0 {
+			inc = 1
+		}
 		for i := 0; i < hauteur_mat1; i += inc {
 			wg_slice[connum].Add(1)
+			if hauteur_mat1%inc != 0 {
+				inc = 1
+			}
 			go printMat(i, i+inc-1, matA, connum, connection)
 		}
 		wg_slice[connum].Wait() // on attend ici que le nombre de tokens soit nul
+		inc = hauteur_mat2 / 10
+		if inc == 0 {
+			inc = 1
+		}
 		for i := 0; i < hauteur_mat2; i += inc {
 			wg_slice[connum].Add(1)
+			if hauteur_mat2%inc != 0 {
+				inc = 1
+			}
 			go printMat(i, i+inc-1, matB, connum, connection)
 		}
 		wg_slice[connum].Wait()
@@ -149,8 +164,15 @@ func handleConnection(connection net.Conn, connum int) {
 		result := make([][]int, hauteur_mat1)
 
 		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
+		inc = hauteur_mat1 / 10
+		if inc == 0 {
+			inc = 1
+		}
 		for i := 0; i < hauteur_mat1; i += inc {
-			wg_slice[connum].Add(1)                                                     // ajout d'un token
+			wg_slice[connum].Add(1) // ajout d'un token
+			if hauteur_mat1%inc != 0 {
+				inc = 1
+			}
 			go multiplicationByLine(i, i+inc-1, matA, matB, result, connum, connection) // lancement des goroutines qui effectuent le calcul
 		}
 
