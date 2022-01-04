@@ -67,7 +67,6 @@ func main() {
 		}
 
 		//If we're here, we did not panic and conn is a valid handler to the new connection
-
 		go handleConnection(conn, connum)
 		connum += 1
 
@@ -89,7 +88,6 @@ func handleConnection(connection net.Conn, connum int) {
 	connReader := bufio.NewReader(connection)
 	var wg sync.WaitGroup
 	wg_slice = append(wg_slice, wg)
-
 	for {
 		inputLine, err := connReader.ReadString('\n')
 		if err != nil {
@@ -142,7 +140,7 @@ func handleConnection(connection net.Conn, connum int) {
 		}
 		for i := 0; i < hauteur_mat1; i += inc {
 			wg_slice[connum].Add(1)
-			if hauteur_mat1%inc != 0 {
+			if hauteur_mat1-i < inc {
 				inc = 1
 			}
 			go printMat(i, i+inc-1, matA, connum, connection)
@@ -154,7 +152,7 @@ func handleConnection(connection net.Conn, connum int) {
 		}
 		for i := 0; i < hauteur_mat2; i += inc {
 			wg_slice[connum].Add(1)
-			if hauteur_mat2%inc != 0 {
+			if hauteur_mat2-i < inc {
 				inc = 1
 			}
 			go printMat(i, i+inc-1, matB, connum, connection)
@@ -170,7 +168,7 @@ func handleConnection(connection net.Conn, connum int) {
 		}
 		for i := 0; i < hauteur_mat1; i += inc {
 			wg_slice[connum].Add(1) // ajout d'un token
-			if hauteur_mat1%inc != 0 {
+			if hauteur_mat1-i < inc {
 				inc = 1
 			}
 			go multiplicationByLine(i, i+inc-1, matA, matB, result, connum, connection) // lancement des goroutines qui effectuent le calcul
@@ -207,8 +205,8 @@ func printMat(from int, to int, mat [][]int, connum int, connection net.Conn) {
 
 func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
 	for line_number := from; line_number <= to; line_number++ { // parcours des lignes de la matrice résultat
-		result[line_number] = make([]int, len(matB[line_number])) // déclaration du tableau stockant une ligne de résultats
-		for j := 0; j < len(matB[line_number]); j++ {             // parcours des colonnes de la matrice
+		result[line_number] = make([]int, len(matB[0])) // déclaration du tableau stockant une ligne de résultats
+		for j := 0; j < len(matB[0]); j++ {             // parcours des colonnes de la matrice
 			for l := 0; l < len(matB); l++ { // parcours des lignes de la matrice
 				result[line_number][j] = result[line_number][j] + matA[line_number][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
 			}

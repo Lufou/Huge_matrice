@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func getArgs() (int, int, int, int, int, int) {
@@ -46,6 +47,8 @@ func main() {
 		reader := bufio.NewReader(conn)
 		fmt.Printf("#DEBUG MAIN connected\n")
 
+		start_time := time.Now()
+		fmt.Printf("Product of %dx%d mat with %dx%d mat, max values = %d\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value)
 		io.WriteString(conn, fmt.Sprintf("%d %d %d %d %d\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value))
 		//117, 124, 129
 		resultString, err := reader.ReadString('\n')
@@ -181,6 +184,10 @@ func main() {
 		}
 
 		printMat(result)
+		elapsed_time := time.Since(start_time)
+		fmt.Printf("\n\n\nFinished in %s\n\n", elapsed_time)
+		fmt.Println("Press the Enter Key to terminate the console screen!")
+		fmt.Scanln() // wait for Enter Key
 	}
 }
 
