@@ -75,10 +75,7 @@ func main() {
 }
 
 func possibleProduct(rA int, cA int, rB int, cB int) bool {
-	if cA != rB {
-		return false
-	}
-	return true
+	return cA == rB
 }
 
 func handleConnection(connection net.Conn, connum int) {
