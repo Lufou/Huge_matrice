@@ -128,7 +128,6 @@ func handleConnection(connection net.Conn, connum int) {
 		//Matrix generation
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 
-		wg_slice = append(wg_slice, wg)
 		//Prints the 2 mat to client?
 		inc = hauteur_mat1 / 10
 		if inc == 0 {

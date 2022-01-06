@@ -73,7 +73,6 @@ func main() {
 				os.Exit(1)
 			}
 			resultString = strings.TrimSuffix(resultString, "\n")
-			fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
 			mat1_string[i] = resultString
 		}
 
@@ -87,7 +86,6 @@ func main() {
 				os.Exit(1)
 			}
 			resultString = strings.TrimSuffix(resultString, "\n")
-			fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
 			mat2_string[i] = resultString
 		}
 
@@ -101,7 +99,6 @@ func main() {
 				os.Exit(1)
 			}
 			resultString = strings.TrimSuffix(resultString, "\n")
-			fmt.Printf("#DEBUG server replied : |%s|\n", strings.Replace(resultString, "end", "", 1))
 			if strings.Contains(resultString, "end") {
 				fmt.Printf("#DEBUG server decided to end the connection.")
 				break
