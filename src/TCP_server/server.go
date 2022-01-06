@@ -22,16 +22,16 @@ var inc = 1
 
 var wg_slice []sync.WaitGroup
 
-func getArgs() int {
+func getArgs() int { // test the number of arguments and return port number, we need 2 arguments : file name, port number
 	if len(os.Args) != 2 {
-		fmt.Printf("Usage: go run server.go <portnumber>\n")
-		os.Exit(1)
+		fmt.Printf("Usage: go run server.go <portnumber>\n") // debug
+		os.Exit(1)                                           // end
 	} else {
-		fmt.Printf("#DEBUG ARGS Port Number : %s\n", os.Args[1])
-		portNumber, err := strconv.Atoi(os.Args[1])
-		if err != nil {
-			fmt.Printf("Usage: go run server.go <portnumber>\n")
-			os.Exit(1)
+		fmt.Printf("#DEBUG ARGS Port Number : %s\n", os.Args[1]) // debug
+		portNumber, err := strconv.Atoi(os.Args[1])              // retrieve the port number and convert it to int
+		if err != nil {                                          // nil == null
+			fmt.Printf("Usage: go run server.go <portnumber>\n") // info
+			os.Exit(1)                                           // end
 		} else {
 			return portNumber
 		}
@@ -42,7 +42,7 @@ func getArgs() int {
 
 func main() {
 	port := getArgs()
-	fmt.Printf("#DEBUG MAIN Creating TCP Server on port %d\n", port)
+	fmt.Printf("#DEBUG MAIN Creating TCP Server on port %d\n", port) // debug
 	portString := fmt.Sprintf(":%s", strconv.Itoa(port))
 	fmt.Printf("#DEBUG MAIN PORT STRING |%s|\n", portString)
 
@@ -74,7 +74,7 @@ func main() {
 
 }
 
-func possibleProduct(rA int, cA int, rB int, cB int) bool {
+func possibleProduct(rA int, cA int, rB int, cB int) bool { // test if the matrices product is possible
 	if cA != rB {
 		return false
 	} else {
@@ -82,39 +82,39 @@ func possibleProduct(rA int, cA int, rB int, cB int) bool {
 	}
 }
 
-func handleConnection(connection net.Conn, connum int) {
+func handleConnection(connection net.Conn, connum int) { // handle the connection server-client
 
-	defer connection.Close()
-	connReader := bufio.NewReader(connection)
-	var wg sync.WaitGroup
-	wg_slice = append(wg_slice, wg)
+	defer connection.Close()                  // at the end of the handleConnection fonction, close the connection
+	connReader := bufio.NewReader(connection) // we wait for client's request
+	var wg sync.WaitGroup                     // initialization of the token
+	wg_slice = append(wg_slice, wg)           // add wg to the wg_slice list
 	for {
-		inputLine, err := connReader.ReadString('\n')
+		inputLine, err := connReader.ReadString('\n') // read the string
 		if err != nil {
 			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
 			fmt.Printf("Error :|%s|\n", err.Error())
-			break
+			break // leave the for
 		}
 
-		start_time := time.Now()
+		start_time := time.Now() // start the timer
 
 		inputLine = strings.TrimSuffix(inputLine, "\n")
 		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
 		//Check each int and see if it's real ints
-		splitLine := strings.Split(inputLine, " ")
+		splitLine := strings.Split(inputLine, " ") // make a table of string based on a string, the separator is " "
 		str_hauteur_mat1 := splitLine[0]
 		str_largeur_mat1 := splitLine[1]
 		str_hauteur_mat2 := splitLine[2]
 		str_largeur_mat2 := splitLine[3]
 		str_int_max_value := splitLine[4]
 
-		hauteur_mat1, err1 := strconv.Atoi(str_hauteur_mat1)
+		hauteur_mat1, err1 := strconv.Atoi(str_hauteur_mat1) // conversion from string to int
 		largeur_mat1, err2 := strconv.Atoi(str_largeur_mat1)
 		hauteur_mat2, err3 := strconv.Atoi(str_hauteur_mat2)
 		largeur_mat2, err4 := strconv.Atoi(str_largeur_mat2)
 		int_max_value, err5 := strconv.Atoi(str_int_max_value)
 
-		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 || int_max_value <= 0 {
+		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || hauteur_mat1 <= 0 || largeur_mat2 <= 0 || hauteur_mat2 <= 0 || largeur_mat1 <= 0 || int_max_value <= 0 { // checking
 			io.WriteString(connection, fmt.Sprintf("%send\n", "Wrong argument provided."))
 			fmt.Printf("#DEBUG %d RCV ERROR : wrong arguments, no panic, just a client\n", connum)
 			break
@@ -127,12 +127,12 @@ func handleConnection(connection net.Conn, connum int) {
 			break
 		}
 
-		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrix can be multiplied"))
+		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrices can be multiplied"))
 
 		//Matrix generation
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 
-		wg_slice = append(wg_slice, wg)
+		wg_slice = append(wg_slice, wg) // add wg to wg_slice list
 		//Prints the 2 mat to client?
 		inc = hauteur_mat1 / 10
 		if inc == 0 {
@@ -143,7 +143,7 @@ func handleConnection(connection net.Conn, connum int) {
 			if hauteur_mat1-i < inc {
 				inc = 1
 			}
-			go printMat(i, i+inc-1, matA, connum, connection)
+			go printMat(i, i+inc-1, matA, connum, connection) // start the goroutine who prints matA
 		}
 		wg_slice[connum].Wait() // on attend ici que le nombre de tokens soit nul
 		inc = hauteur_mat2 / 10
@@ -152,14 +152,14 @@ func handleConnection(connection net.Conn, connum int) {
 		}
 		for i := 0; i < hauteur_mat2; i += inc {
 			wg_slice[connum].Add(1)
-			if hauteur_mat2-i < inc {
+			if hauteur_mat2-i < inc { // si la matrice n'est pas de la taille d'un multiple de inc, pour print les dernières lignes on fait 1 par 1
 				inc = 1
 			}
-			go printMat(i, i+inc-1, matB, connum, connection)
+			go printMat(i, i+inc-1, matB, connum, connection) // start the goroutine who prints matB
 		}
-		wg_slice[connum].Wait()
+		wg_slice[connum].Wait() // on attend que le sac de token soit vide
 		//Do the calculation of mat multiplication
-		result := make([][]int, hauteur_mat1)
+		result := make([][]int, hauteur_mat1) // initialization of the result matrix
 
 		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
 		inc = hauteur_mat1 / 10
@@ -194,9 +194,9 @@ func printMat(from int, to int, mat [][]int, connum int, connection net.Conn) {
 		matrix_line.id = line_number
 		matrix_line.line_string = ""
 		for j := 0; j < len(mat[line_number]); j++ {
-			matrix_line.line_string += strconv.Itoa(mat[line_number][j]) + " "
+			matrix_line.line_string += strconv.Itoa(mat[line_number][j]) + " " // convert from int to string
 		}
-		matrix_line.line_string = strings.TrimSuffix(matrix_line.line_string, " ")
+		matrix_line.line_string = strings.TrimSuffix(matrix_line.line_string, " ") // trim the suffix
 		//envoi vers une méthode qui permet d'envoyer la struct
 		envoiStruct(matrix_line, connum, connection)
 	}
