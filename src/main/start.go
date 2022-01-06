@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+	"log"
 )
 
 func main() {
@@ -30,12 +31,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	s := []string{"cmd", "/C", "start", "./server.exe", "6000"}
-	cmd := exec.Command(s[0], s[1:]...)
-	if err := cmd.Run(); err != nil {
+	cmd := exec.Command("cmd", "/C", "start", "./server.exe", "6000")
+	err := cmd.Start()
+	if err != nil {
 		fmt.Println("Error:", err)
+		log.Fatal(err)
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	for i := 0; i < client_amount; i++ {
 		rand.Seed(time.Now().UnixNano())
 		ra := fmt.Sprintf("%d", rand.Intn(sizes-1)+2)
@@ -43,12 +45,12 @@ func main() {
 		cb := fmt.Sprintf("%d", rand.Intn(sizes-1)+2)
 		max_value := fmt.Sprintf("%d", rand.Intn(max_values-9)+10)
 
-		s = []string{"cmd.exe", "/k", "cmd", "/C", "start", "./client.exe", "6000", ra, ca, ca, cb, max_value}
-
-		cmd := exec.Command(s[0], s[1:]...)
-		if err := cmd.Run(); err != nil {
+		cmd := exec.Command("cmd.exe", "/k", "cmd", "/C", "start", "./client.exe", "6000", ra, ca, ca, cb, max_value)
+		err := cmd.Start()
+		if err != nil {
 			fmt.Println("Error:", err)
+			log.Fatal(err)
 		}
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(2 * time.Second)
 	}
 }

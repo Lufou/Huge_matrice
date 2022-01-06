@@ -102,9 +102,11 @@ func main() {
 	fmt.Printf("Awaiting results\n")
 	// Receiving result
 	result_string := make([]string, hauteur_mat1)
-
+	fmt.Printf("Wesh poto %d\n", hauteur_mat1)
 	for i := 0; i < hauteur_mat1; i++ {
+		fmt.Printf(" I'm here %d\n", i)
 		resultString, err = reader.ReadString('\n')
+		fmt.Printf(" I'm here now %d\n", i)
 		if err != nil {
 			fmt.Printf("DEBUG MAIN could not read from server")
 			fmt.Scanln()
@@ -112,7 +114,7 @@ func main() {
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
 		result_string[i] = resultString
-		fmt.Printf("%d\n", i)
+		fmt.Printf("And now i'm at the end %d\n", i)
 	}
 
 	// Printing Matrix 1
