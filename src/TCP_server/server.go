@@ -75,11 +75,7 @@ func main() {
 }
 
 func possibleProduct(rA int, cA int, rB int, cB int) bool { // test if the matrices product is possible
-	if cA != rB {
-		return false
-	} else {
-		return true
-	}
+	return cA == rB
 }
 
 func handleConnection(connection net.Conn, connum int) { // handle the connection server-client
