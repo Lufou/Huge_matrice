@@ -21,6 +21,7 @@ type matrix_line struct {
 var inc = 1
 
 var wg_slice []sync.WaitGroup
+var lock sync.Mutex
 
 func getArgs() int { // test the number of arguments and return port number, we need 2 arguments : file name, port number
 	if len(os.Args) != 2 {
@@ -79,7 +80,9 @@ func handleConnection(connection net.Conn, connum int) { // handle the connectio
 	defer connection.Close()                  // at the end of the handleConnection fonction, close the connection
 	connReader := bufio.NewReader(connection) // we wait for client's request
 	var wg sync.WaitGroup                     // initialization of the token group
-	wg_slice = append(wg_slice, wg)           // add wg to the wg_slice list
+	lock.Lock()
+	wg_slice = append(wg_slice, wg) // add wg to the wg_slice list
+	lock.Unlock()
 	for {
 		inputLine, err := connReader.ReadString('\n') // read the string sent by the client
 		if err != nil {
@@ -125,55 +128,69 @@ func handleConnection(connection net.Conn, connum int) { // handle the connectio
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 
 		//Prints the 2 mat to client?
+		fmt.Printf("#DEBUG %d START MAT1 PRINTING\n", connum)
 		inc = hauteur_mat1 / 10
 		if inc == 0 {
 			inc = 1
 		}
 		for i := 0; i < hauteur_mat1; i += inc {
+			lock.Lock()
 			wg_slice[connum].Add(1)
+			lock.Unlock()
 			if hauteur_mat1-i < inc {
 				inc = 1
 			}
 			go printMat(i, i+inc-1, matA, connum, connection) // start the goroutine who prints matA
 		}
+		fmt.Printf("#DEBUG %d WAITING FOR PRINTING TO END\n", connum)
+		lock.Lock()
 		wg_slice[connum].Wait() // wait for the token group to be empty
+		lock.Unlock()
+		fmt.Printf("#DEBUG %d START MAT2 PRINTING\n", connum)
 		inc = hauteur_mat2 / 10
 		if inc == 0 {
 			inc = 1
 		}
 		for i := 0; i < hauteur_mat2; i += inc {
+			lock.Lock()
 			wg_slice[connum].Add(1)
+			lock.Unlock()
 			if hauteur_mat2-i < inc { // if the size of the matrix is not a multiple of inc, last lines are processed one by one
 				inc = 1
 			}
 			go printMat(i, i+inc-1, matB, connum, connection) // start the goroutine who prints matB
 		}
+		fmt.Printf("#DEBUG %d WAITING FOR PRINTING TO END\n", connum)
+		lock.Lock()
 		wg_slice[connum].Wait()
+		lock.Unlock()
 		//Do the calculation of mat multiplication
 		result := make([][]int, hauteur_mat1) // initialization of the result matrix
 
-		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum)
+		fmt.Printf("#DEBUG %d START MAT MULTIPLICATION\n", connum)
 		inc = hauteur_mat1 / 10
 		if inc == 0 {
 			inc = 1
 		}
 		for i := 0; i < hauteur_mat1; i += inc {
+			lock.Lock()
 			wg_slice[connum].Add(1)
+			lock.Unlock()
 			if hauteur_mat1-i < inc {
 				inc = 1
 			}
 			go multiplicationByLine(i, i+inc-1, matA, matB, result, connum, connection) // Launching calculation goroutines
 		}
 
+		lock.Lock()
 		wg_slice[connum].Wait()
-		fmt.Printf("#DEBUG %d END GOROUTINES\n", connum)
-		fmt.Printf("#DEBUG %d START GOROUTINES PRINTLINES\n", connum)
+		lock.Unlock()
+		fmt.Printf("#DEBUG %d END MULTIPLICAION\n", connum)
 
 		//Say DONE to the client with the elapsed time
 		elapsed_time := time.Since(start_time)
 		returnedString := fmt.Sprintf("Done in %s", elapsed_time)
 		fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
-		io.WriteString(connection, fmt.Sprintf("%send\n", returnedString))
 		//And the client will reassemble them to print the whole mat
 	}
 }

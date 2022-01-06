@@ -43,6 +43,7 @@ func main() {
 	conn, err := net.Dial("tcp", portString)
 	if err != nil {
 		fmt.Printf("#DEBUG MAIN could not connect\n")
+		fmt.Scanln()
 		os.Exit(1)
 	}
 
@@ -57,15 +58,18 @@ func main() {
 	resultString, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Printf("#DEBUG MAIN could not read from server")
+		fmt.Scanln()
 		os.Exit(1)
 	}
 	resultString = strings.TrimSuffix(resultString, "\n")
 	fmt.Printf("#DEBUG server replied : |%s|\n", strings.Replace(resultString, "end", "", 1))
 	if strings.Contains(resultString, "end") {
 		fmt.Printf("#DEBUG server decided to end the connection.")
+		fmt.Scanln()
 		return
 	}
 
+	fmt.Printf("Awaiting mat1\n")
 	// Receiving matrix 1
 	mat1_string := make([]string, hauteur_mat1)
 
@@ -73,13 +77,14 @@ func main() {
 		resultString, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("DEBUG MAIN could not read from server")
+			fmt.Scanln()
 			os.Exit(1)
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
-		fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
 		mat1_string[i] = resultString
 	}
 
+	fmt.Printf("Awaiting mat2\n")
 	// Receiving matrix 2
 	mat2_string := make([]string, hauteur_mat2)
 
@@ -87,29 +92,27 @@ func main() {
 		resultString, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("DEBUG MAIN could not read from server")
+			fmt.Scanln()
 			os.Exit(1)
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
-		fmt.Printf("#DEBUG server replied : |%s|\n", resultString)
 		mat2_string[i] = resultString
 	}
 
+	fmt.Printf("Awaiting results\n")
 	// Receiving result
 	result_string := make([]string, hauteur_mat1)
 
-	for i := 0; i < hauteur_mat1+1; i++ {
+	for i := 0; i < hauteur_mat1; i++ {
 		resultString, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("DEBUG MAIN could not read from server")
+			fmt.Scanln()
 			os.Exit(1)
 		}
 		resultString = strings.TrimSuffix(resultString, "\n")
-		fmt.Printf("#DEBUG server replied : |%s|\n", strings.Replace(resultString, "end", "", 1))
-		if strings.Contains(resultString, "end") {
-			fmt.Printf("#DEBUG server decided to end the connection.")
-			break
-		}
 		result_string[i] = resultString
+		fmt.Printf("%d\n", i)
 	}
 
 	// Printing Matrix 1
@@ -121,6 +124,7 @@ func main() {
 		line_number, err := strconv.Atoi(split[0])
 		if err != nil {
 			fmt.Printf("ERROR Incorrect string format received from server. FATAL ERROR")
+			fmt.Scanln()
 			return
 		}
 
@@ -130,6 +134,7 @@ func main() {
 			value, err := strconv.Atoi(split[j+1])
 			if err != nil {
 				fmt.Printf("ERROR Incorrect string format received from server. FATAL ERROR")
+				fmt.Scanln()
 				return
 			}
 			matA[line_number][j] = value
@@ -147,6 +152,7 @@ func main() {
 		line_number, err := strconv.Atoi(split[0])
 		if err != nil {
 			fmt.Printf("ERROR Incorrect string format received from server. FATAL ERROR")
+			fmt.Scanln()
 			return
 		}
 
@@ -156,6 +162,7 @@ func main() {
 			value, err := strconv.Atoi(split[j+1])
 			if err != nil {
 				fmt.Printf("ERROR Incorrect string format received from server. FATAL ERROR")
+				fmt.Scanln()
 				return
 			}
 			matB[line_number][j] = value
@@ -173,6 +180,7 @@ func main() {
 		line_number, err := strconv.Atoi(split[0])
 		if err != nil {
 			fmt.Printf("ERROR Incorrect string format received from server. FATAL ERROR")
+			fmt.Scanln()
 			return
 		}
 
@@ -182,6 +190,7 @@ func main() {
 			value, err := strconv.Atoi(split[j+1])
 			if err != nil {
 				fmt.Printf("ERROR Incorrect string format received from server. FATAL ERROR")
+				fmt.Scanln()
 				return
 			}
 			result[line_number][j] = value
