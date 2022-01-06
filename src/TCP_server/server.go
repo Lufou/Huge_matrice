@@ -24,14 +24,14 @@ var wg_slice []sync.WaitGroup
 
 func getArgs() int { // test the number of arguments and return port number, we need 2 arguments : file name, port number
 	if len(os.Args) != 2 {
-		fmt.Printf("Usage: go run server.go <portnumber>\n") // debug
-		os.Exit(1)                                           // end
+		fmt.Printf("Usage: go run server.go <portnumber>\n")
+		os.Exit(1) // end
 	} else {
-		fmt.Printf("#DEBUG ARGS Port Number : %s\n", os.Args[1]) // debug
-		portNumber, err := strconv.Atoi(os.Args[1])              // retrieve the port number and convert it to int
-		if err != nil {                                          // nil == null
-			fmt.Printf("Usage: go run server.go <portnumber>\n") // info
-			os.Exit(1)                                           // end
+		fmt.Printf("#DEBUG ARGS Port Number : %s\n", os.Args[1])
+		portNumber, err := strconv.Atoi(os.Args[1]) // retrieve the port number and convert it to int
+		if err != nil {
+			fmt.Printf("Usage: go run server.go <portnumber>\n")
+			os.Exit(1)
 		} else {
 			return portNumber
 		}
@@ -42,7 +42,7 @@ func getArgs() int { // test the number of arguments and return port number, we 
 
 func main() {
 	port := getArgs()
-	fmt.Printf("#DEBUG MAIN Creating TCP Server on port %d\n", port) // debug
+	fmt.Printf("#DEBUG MAIN Creating TCP Server on port %d\n", port)
 	portString := fmt.Sprintf(":%s", strconv.Itoa(port))
 	fmt.Printf("#DEBUG MAIN PORT STRING |%s|\n", portString)
 
@@ -51,8 +51,6 @@ func main() {
 		fmt.Printf("#DEBUG MAIN Could not create listener\n")
 		panic(err)
 	}
-
-	//If we're here, we did not panic and ln is a valid listener
 
 	connum := 0
 
@@ -69,9 +67,7 @@ func main() {
 		//If we're here, we did not panic and conn is a valid handler to the new connection
 		go handleConnection(conn, connum)
 		connum += 1
-
 	}
-
 }
 
 func possibleProduct(rA int, cA int, rB int, cB int) bool { // test if the matrices product is possible
@@ -82,17 +78,17 @@ func handleConnection(connection net.Conn, connum int) { // handle the connectio
 
 	defer connection.Close()                  // at the end of the handleConnection fonction, close the connection
 	connReader := bufio.NewReader(connection) // we wait for client's request
-	var wg sync.WaitGroup                     // initialization of the token
+	var wg sync.WaitGroup                     // initialization of the token group
 	wg_slice = append(wg_slice, wg)           // add wg to the wg_slice list
 	for {
-		inputLine, err := connReader.ReadString('\n') // read the string
+		inputLine, err := connReader.ReadString('\n') // read the string sent by the client
 		if err != nil {
 			fmt.Printf("#DEBUG %d RCV ERROR no panic, just a client\n", connum)
 			fmt.Printf("Error :|%s|\n", err.Error())
-			break // leave the for
+			break // leave the for and close the connection
 		}
 
-		start_time := time.Now() // start the timer
+		start_time := time.Now() // save the date
 
 		inputLine = strings.TrimSuffix(inputLine, "\n")
 		fmt.Printf("#DEBUG %d RCV |%s|\n", connum, inputLine)
@@ -125,7 +121,7 @@ func handleConnection(connection net.Conn, connum int) { // handle the connectio
 
 		io.WriteString(connection, fmt.Sprintf("%s\n", "Matrices can be multiplied"))
 
-		//Matrix generation
+		//Matrices generation
 		matA, matB := remplirMatrices(hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, int_max_value)
 
 		//Prints the 2 mat to client?
@@ -140,70 +136,70 @@ func handleConnection(connection net.Conn, connum int) { // handle the connectio
 			}
 			go printMat(i, i+inc-1, matA, connum, connection) // start the goroutine who prints matA
 		}
-		wg_slice[connum].Wait() // on attend ici que le nombre de tokens soit nul
+		wg_slice[connum].Wait() // wait for the token group to be empty
 		inc = hauteur_mat2 / 10
 		if inc == 0 {
 			inc = 1
 		}
 		for i := 0; i < hauteur_mat2; i += inc {
 			wg_slice[connum].Add(1)
-			if hauteur_mat2-i < inc { // si la matrice n'est pas de la taille d'un multiple de inc, pour print les dernières lignes on fait 1 par 1
+			if hauteur_mat2-i < inc { // if the size of the matrix is not a multiple of inc, last lines are processed one by one
 				inc = 1
 			}
 			go printMat(i, i+inc-1, matB, connum, connection) // start the goroutine who prints matB
 		}
-		wg_slice[connum].Wait() // on attend que le sac de token soit vide
+		wg_slice[connum].Wait()
 		//Do the calculation of mat multiplication
 		result := make([][]int, hauteur_mat1) // initialization of the result matrix
 
-		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum) // debug
+		fmt.Printf("#DEBUG %d START GOROUTINES\n", connum)
 		inc = hauteur_mat1 / 10
 		if inc == 0 {
 			inc = 1
 		}
 		for i := 0; i < hauteur_mat1; i += inc {
-			wg_slice[connum].Add(1) // ajout d'un token
+			wg_slice[connum].Add(1)
 			if hauteur_mat1-i < inc {
 				inc = 1
 			}
-			go multiplicationByLine(i, i+inc-1, matA, matB, result, connum, connection) // lancement des goroutines qui effectuent le calcul
+			go multiplicationByLine(i, i+inc-1, matA, matB, result, connum, connection) // Launching calculation goroutines
 		}
 
-		wg_slice[connum].Wait()                                       // on attend ici que le nombre de tokens soit nul
-		fmt.Printf("#DEBUG %d END GOROUTINES\n", connum)              // debug
-		fmt.Printf("#DEBUG %d START GOROUTINES PRINTLINES\n", connum) // debug
+		wg_slice[connum].Wait()
+		fmt.Printf("#DEBUG %d END GOROUTINES\n", connum)
+		fmt.Printf("#DEBUG %d START GOROUTINES PRINTLINES\n", connum)
 
 		//Say DONE to the client with the elapsed time
 		elapsed_time := time.Since(start_time)
 		returnedString := fmt.Sprintf("Done in %s", elapsed_time)
 		fmt.Printf("#DEBUG %d RCV Returned value |%s|\n", connum, returnedString)
 		io.WriteString(connection, fmt.Sprintf("%send\n", returnedString))
-		//And the client will reassemble them (pretty quick I think) to print the whole mat
+		//And the client will reassemble them to print the whole mat
 	}
 }
 
 func printMat(from int, to int, mat [][]int, connum int, connection net.Conn) {
 	for line_number := from; line_number <= to; line_number++ {
-		//Creation structure
+		//Creation struct
 		var matrix_line matrix_line
 		matrix_line.id = line_number
 		matrix_line.line_string = ""
 		for j := 0; j < len(mat[line_number]); j++ {
-			matrix_line.line_string += strconv.Itoa(mat[line_number][j]) + " " // convert from int to string
+			matrix_line.line_string += strconv.Itoa(mat[line_number][j]) + " " // convert int to string
 		}
 		matrix_line.line_string = strings.TrimSuffix(matrix_line.line_string, " ") // trim the suffix
-		//envoi vers une méthode qui permet d'envoyer la struct
-		envoiStruct(matrix_line, connum, connection)
+
+		envoiStruct(matrix_line, connum, connection) // send struct to client
 	}
 	wg_slice[connum].Done()
 }
 
 func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [][]int, connum int, connection net.Conn) {
-	for line_number := from; line_number <= to; line_number++ { // parcours des lignes de la matrice résultat
-		result[line_number] = make([]int, len(matB[0])) // déclaration du tableau stockant une ligne de résultats
-		for j := 0; j < len(matB[0]); j++ {             // parcours des colonnes de la matrice
-			for l := 0; l < len(matB); l++ { // parcours des lignes de la matrice
-				result[line_number][j] = result[line_number][j] + matA[line_number][l]*matB[l][j] // calcul du coefficient à la j-eme colonne de la ligne en cours de calcul
+	for line_number := from; line_number <= to; line_number++ {
+		result[line_number] = make([]int, len(matB[0]))
+		for j := 0; j < len(matB[0]); j++ {
+			for l := 0; l < len(matB); l++ {
+				result[line_number][j] = result[line_number][j] + matA[line_number][l]*matB[l][j]
 			}
 		}
 	}
@@ -211,31 +207,28 @@ func multiplicationByLine(from int, to int, matA [][]int, matB [][]int, result [
 }
 
 func envoiStruct(matrix_line matrix_line, connum int, connection net.Conn) {
-	//fmt.Printf("#DEBUG %d SENDING line id %d\n", connum, matrix_line.id)
 	io.WriteString(connection, fmt.Sprintf("%d %s\n", matrix_line.id, matrix_line.line_string))
 }
 
 func remplirMatrices(hauteur_matA int, largeur_matA int, hauteur_matB int, largeur_matB int, max_value int) ([][]int, [][]int) {
-	fmt.Printf("#DEBUG START remplirMatrices\n") // debug
-	matA := make([][]int, hauteur_matA)          // déclaration du tableau contenant le nombre de lignes de la matrice A
-	for i := 0; i < hauteur_matA; i++ {          // parcours de la matrice A par lignes
-		matA[i] = make([]int, largeur_matA) // pour chaque ligne i, on génère un tableau contenant [largeur_matA] colonnes
-		for j := 0; j < largeur_matA; j++ { // parcours de la matrice par colonnes
-			matA[i][j] = rand.Intn(max_value) // Default: 10000
-			// remplissage de l'élément [i][j] de matA par une valeur aléatoire comprise entre 1 et max_value
+	fmt.Printf("#DEBUG START remplirMatrices\n")
+	matA := make([][]int, hauteur_matA)
+	for i := 0; i < hauteur_matA; i++ {
+		matA[i] = make([]int, largeur_matA)
+		for j := 0; j < largeur_matA; j++ {
+			matA[i][j] = rand.Intn(max_value)
 		}
 	}
 
-	matB := make([][]int, hauteur_matB) // déclaration du tableau contenant le nombre de lignes de la matrice B
-	for i := 0; i < hauteur_matB; i++ { // parcours de la matrice B par lignes
-		matB[i] = make([]int, largeur_matB) // pour chaque ligne i, on génère un tableau contenant [largeur_matB] colonnes
-		for j := 0; j < largeur_matB; j++ { // parcours de la matrice par colonnes
-			matB[i][j] = rand.Intn(max_value) // Default: 10000
-			// remplissage de l'élément [i][j] de matB par une valeur aléatoire comprise entre 1 et max_value
+	matB := make([][]int, hauteur_matB)
+	for i := 0; i < hauteur_matB; i++ {
+		matB[i] = make([]int, largeur_matB)
+		for j := 0; j < largeur_matB; j++ {
+			matB[i][j] = rand.Intn(max_value)
 		}
 	}
 
-	fmt.Printf("\n#DEBUG END remplirMatrices\n") // debug
+	fmt.Printf("\n#DEBUG END remplirMatrices\n")
 
 	return matA, matB
 }

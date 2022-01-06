@@ -12,21 +12,21 @@ import (
 )
 
 func getArgs() (int, int, int, int, int, int) {
-	//Retreive the arguments
+	//Retrieve the arguments
 	//<Port Number> <Height Matrix 1> <Width Matrix 1> <Height Matrix 2> <Width Matrix 2> <Maximum int value in the matrices 1 and 2>
 
 	if len(os.Args) != 7 { //Test if we have the good number of arguments
 		fmt.Printf("Usage: go run client.go <portnumber> <mat1_height> <mat1_width> <mat2_height> <mat2_width> <max_int_value>\n")
 		os.Exit(1)
 	}
-	portNumber, err := strconv.Atoi(os.Args[1]) //We retreive the arguments in variables
+	portNumber, err := strconv.Atoi(os.Args[1]) // Try convert strings to ints
 	mat1_height, err1 := strconv.Atoi(os.Args[2])
 	mat1_width, err2 := strconv.Atoi(os.Args[3])
 	mat2_height, err3 := strconv.Atoi(os.Args[4])
 	mat2_width, err4 := strconv.Atoi(os.Args[5])
 	max_int_value, err5 := strconv.Atoi(os.Args[6])
 
-	if err != nil || err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil { //We check if there is no error
+	if err != nil || err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil { //Check conversion errors
 		fmt.Printf("Usage: go run client.go <portnumber> <mat1_height> <mat1_width> <mat2_height> <mat2_width> <max_int_value>\n")
 		os.Exit(1)
 	}
@@ -35,7 +35,7 @@ func getArgs() (int, int, int, int, int, int) {
 }
 
 func main() {
-	port, hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value := getArgs() //We retreive the arguments in variables
+	port, hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value := getArgs() //We retrieve the arguments in variables
 	fmt.Printf("#DEBUG DIALING TCP Server on port %d\n", port)
 	portString := fmt.Sprintf("127.0.0.1:%s", strconv.Itoa(port))
 	fmt.Printf("#DEBUG MAIN PORT STRING |%s|\n", portString)
@@ -53,7 +53,7 @@ func main() {
 	start_time := time.Now()
 	fmt.Printf("Product of %dx%d mat with %dx%d mat, max values = %d\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value)
 	io.WriteString(conn, fmt.Sprintf("%d %d %d %d %d\n", hauteur_mat1, largeur_mat1, hauteur_mat2, largeur_mat2, max_int_value))
-	//117, 124, 129
+
 	resultString, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Printf("#DEBUG MAIN could not read from server")
@@ -190,10 +190,10 @@ func main() {
 
 	printMat(result)
 
-	elapsed_time := time.Since(start_time)               //Calculate elapsed time
+	elapsed_time := time.Since(start_time)               //Calculating elapsed time
 	fmt.Printf("\n\n\nFinished in %s\n\n", elapsed_time) //Printing elapsed time
 	fmt.Println("Press the Enter Key to terminate the console screen!")
-	fmt.Scanln() //Wait for Enter Key
+	fmt.Scanln() //Wait for Enter Key, useful to prevent the terminal from closing
 
 }
 
