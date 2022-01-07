@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
-	"log"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	cmd := exec.Command("cmd", "/C", "start", "./server.exe", "6000")
-	err := cmd.Start()
+	err := cmd.Run()
 	if err != nil {
 		fmt.Println("Error:", err)
 		log.Fatal(err)
@@ -46,11 +46,11 @@ func main() {
 		max_value := fmt.Sprintf("%d", rand.Intn(max_values-9)+10)
 
 		cmd := exec.Command("cmd.exe", "/k", "cmd", "/C", "start", "./client.exe", "6000", ra, ca, ca, cb, max_value)
-		err := cmd.Start()
+		err := cmd.Run()
 		if err != nil {
 			fmt.Println("Error:", err)
 			log.Fatal(err)
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
