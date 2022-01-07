@@ -51,6 +51,6 @@ func main() {
 			fmt.Println("Error:", err)
 			log.Fatal(err)
 		}
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
